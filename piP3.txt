@@ -1,0 +1,46 @@
+#include<stdio.h>
+#include<omp.h>
+#include<math.h>
+#include<stdlib.h>
+
+
+#define PI 3.1415926538837211
+static long n;
+double step;
+
+/* Main Program */
+
+void main()
+{
+	int i;
+	double x, pi, sum = 0.0;
+	
+
+	printf("Enter number of intervals\n");
+	scanf_s("%d", &n);
+
+	if (n <= 0) {
+		printf("Number of intervals should be positive integer\n");
+		exit(1);
+	}
+	step = 1.0 / n;
+
+	/*
+	 * OpenMP Parallel Directive With Private Shared Clauses And Critical
+	 * Section
+	 */
+
+#pragma omp parallel for private(x) reduction(+:sum)
+	for (i = 1; i < n + 1; i++) {
+		x = step * (i - 0.5);
+
+		/* OPENMP Critical Section Directive */
+
+#pragma omp critical
+		sum +=  4.0 / (1 + x * x);
+	}
+	pi = sum / n;
+
+
+	printf("The value of PI is \t %f  \n error is \t %1.16f\n", pi,fabs(pi - PI));
+}

@@ -1,0 +1,37 @@
+#include<stdio.h>
+#include<malloc.h>
+#include<omp.h>
+int main()
+{
+	int sec, items, * allitems, total = 0, i, j=0, threads;
+	printf("Enter number of sections : ");
+	scanf_s("%d", &sec);
+	printf("Enter number of items : ");
+	scanf_s("%d", &items);
+	allitems = (int*)malloc(sec * items * sizeof(int));
+	printf("enter the items");
+	for (i = 0; i < sec; i++) {
+		printf(" section %d\n", i + 1);
+		for (j = 0; j < items; j++) {
+			scanf_s("%d", &allitems[i * items + j]);
+		}
+	}
+
+	omp_set_num_threads(2);
+#pragma omp parallel for num_threads(4)
+	for (i = 0; i < sec; i++)
+	{
+		for (j = 0; j < items; j++)
+		{
+#pragma omp critical
+			{
+				total += allitems[i * items + j];
+			}
+		}
+		threads = omp_get_num_threads();
+	}
+	printf("\n Total cost : %d\n", total);
+	printf("\n Threads : %d\n", threads);
+	return 0;
+}
+

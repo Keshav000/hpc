@@ -1,0 +1,84 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <omp.h>
+
+int main()
+{
+	int r, c, vs, i, j;
+	float **matrix, *vector,*result, *checkop;
+	printf("Enter num of rows,cols and vector size\n");
+	scanf_s("%d%d%d", &r, &c, &vs);
+
+	if (r <= 0 || c <= 0 || vs <= 0)
+	{
+		printf("Invalid size");
+		exit(1);
+	}
+	
+	if (c != vs)
+	{
+		printf("Vector size should be equal to no. of columns\n");
+		exit(1);
+	}
+
+	matrix = (float**)malloc(r * sizeof(float));
+	for (i = 0; i < r; i++)
+	{
+		matrix[i] = (float*)malloc(sizeof(float) * c);
+		for (j = 0; j < c; j++)
+			matrix[i][j] = i + j;
+
+	}
+
+	printf("The matrix is \n");
+	for (i = 0; i < r; i++)
+	{
+		for (j = 0; j < c; j++)
+			printf("%f\t", matrix[i][j]);
+		printf("\n");
+	}
+	printf("\n");
+
+	vector = (float*)malloc(vs * sizeof(float));
+	for (i = 0; i < vs; i++)
+		vector[i] = i;
+	printf("\n");
+
+	printf("The vector is : \n");
+	for (i = 0; i < vs; i++)
+		printf("%f\t", vector[i]);
+
+	result = (float*)malloc(r * sizeof(float));
+	checkop = (float*)malloc(r * sizeof(float));
+
+	//openMP parallel
+#pragma omp parallel for private(j)
+	for (i = 0; i < r; i++)
+		for (j = 0; i < c; j++)
+			result[i] += matrix[i][j] * vector[j];
+
+	//serial computation
+	for (i = 0; i < r; i++)
+		for (j = 0; i < c; j++)
+			checkop[i] += matrix[i][j] * vector[j];
+
+	for (i = 0; i < r; i++)
+		if (checkop[i] == result[i])
+			continue;
+		else
+		{
+			printf("Difference in Serial and parallel computation\n");
+			exit(1);
+		}
+
+
+	printf("Computation result is: \n");
+	for (i = 0; i < r; i++)
+		printf("%f\n", result[i]);
+	free(vector);
+	free(result);
+	free(matrix);
+	free(checkop);
+
+	return 0;
+}
