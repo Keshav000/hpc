@@ -1,0 +1,39 @@
+#include <iostream>
+#include<stdlib.h>
+#include<omp.h>
+using namespace std;
+
+int main()
+{
+    int sec, items;
+    cout << "Enter number of sections: \n";
+    cin >> sec;
+    cout << "Enter number of items in each section:\n";
+    cin >> items;
+    int m[100][100];
+    for (int i = 0; i < sec; i++)
+    {
+        cout << "Enter items in sec " << i + 1 << endl;
+        for (int j = 0; j < items ;j++)
+            cin >> m[i][j];
+    }
+    int sum = 0, threads;
+
+
+    omp_set_num_threads(4);
+#pragma omp parallel for num_threads(4)
+        for (int i = 0; i < sec; i++)
+        {
+            for (int j = 0; j < items; j++)
+            {
+#pragma omp critical
+                {
+                    sum += m[i][j];
+                }
+
+            }
+            threads = omp_get_num_threads();
+        }
+        cout << "Total :" << sum << endl;
+        cout << "Threads used : " << threads << endl;
+}
